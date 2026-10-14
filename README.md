@@ -128,6 +128,7 @@ The app is a **single Node.js service**: the same server delivers the REST API, 
 | `NODE_ENV` | | `production` on the server |
 | `PORT` | | Default `4000` (most hosts set this automatically) |
 | `TRUST_PROXY` | | Number of reverse proxies in front (default `1` in production) |
+| `SEED_DEMO_QUIZ` | | `false` disables auto-adding the demo quiz to a brand-new empty database |
 | `MAX_PARTICIPANTS` | | Per session, default `300` |
 | `GET_READY_MS` | | "Get ready" countdown before each question, default `3000` |
 | `JOIN_RATE_LIMIT` | | Join attempts per minute per IP, default `300` (a whole classroom often shares one public IP) |
@@ -136,9 +137,9 @@ The app is a **single Node.js service**: the same server delivers the REST API, 
 1. Push this folder to a GitHub repository.
 2. In Render, go to **New → Blueprint**, select the repo, and `render.yaml` creates the web service and a PostgreSQL database.
 3. Enter `ADMIN_PASSWORD` and `PUBLIC_URL` (for example `https://scalive-quiz-arena.onrender.com`, or your own domain once attached).
-4. After the first deploy, open the service **Shell** and run `npm run db:seed` once to load the 20 Claude questions.
+4. No seeding step is needed: on its first start with an empty database, the server adds the 20-question Claude AI quiz automatically (set `SEED_DEMO_QUIZ=false` to turn this off).
 
-Free Render web services go to sleep when idle and take about a minute to wake. Open the site a few minutes before class, or use the `starter` plan as configured.
+The blueprint uses Render free plans. Free web services sleep after about 15 minutes idle and take about a minute to wake, so open the site a few minutes before class. Free Render Postgres expires after 30 days; for a lasting database, create a free one at neon.tech and set `DATABASE_URL` to it.
 
 ### Option B — Docker (any VPS, Railway, Fly.io, etc.)
 ```bash
@@ -148,7 +149,6 @@ docker run -p 4000:4000 \
   -e ADMIN_PASSWORD="…" -e SESSION_SECRET="…" \
   -e PUBLIC_URL="https://quiz.scalive.in" \
   scalive-quiz
-# once: docker exec -it <container> npm run db:seed
 ```
 Put it behind HTTPS (Caddy, Nginx or the platform's proxy) and make sure the proxy forwards WebSocket upgrades. Most platforms do this by default.
 
@@ -156,7 +156,6 @@ Put it behind HTTPS (Caddy, Nginx or the platform's proxy) and make sure the pro
 ```bash
 npm ci --include=dev && npm run build   # build
 npm start                               # migrate + run (set the env vars above)
-npm run db:seed                         # once
 ```
 
 ### Option D — Offline classroom LAN (no internet)

@@ -1,4 +1,4 @@
-import type { OptionKey } from '../src/shared/protocol';
+import type { OptionKey } from '../shared/protocol';
 
 export interface SeedQuestion {
   text: string;
