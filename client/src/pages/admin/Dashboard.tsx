@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChartColumn, CopyPlus, Pencil, Play, Plus, Presentation, Trash2, Users } from 'lucide-react';
+import { ChartColumn, CopyPlus, FileUp, Pencil, Play, Plus, Presentation, Trash2, Users } from 'lucide-react';
 import { api } from '../../lib/api';
 import { ErrorNote, Modal, Spinner } from '../../components/ui';
 
@@ -55,6 +55,22 @@ export default function Dashboard() {
     const quiz = await api<{ id: string }>('/api/quizzes', { method: 'POST', json: { title: 'Untitled quiz', timerSeconds: 15, questions: [] } });
     navigate(`/admin/quiz/${quiz.id}`);
   };
+  /** Creates a whole quiz (title, timer, questions) from a JSON file such as one made by "Export JSON". */
+  const importQuiz = async (file: File | undefined, input: HTMLInputElement) => {
+    input.value = '';
+    if (!file) return;
+    setError('');
+    try {
+      const data = JSON.parse(await file.text());
+      const body = Array.isArray(data)
+        ? { title: file.name.replace(/\.json$/i, ''), timerSeconds: 15, questions: data }
+        : { title: data.title || file.name.replace(/\.json$/i, ''), description: data.description, timerSeconds: data.timerSeconds === 10 ? 10 : 15, questions: data.questions ?? [] };
+      const quiz = await api<{ id: string; questions: unknown[] }>('/api/quizzes', { method: 'POST', json: body });
+      navigate(`/admin/quiz/${quiz.id}`);
+    } catch (e) {
+      setError(`Could not import "${file.name}": ${e instanceof SyntaxError ? 'not a valid JSON file' : (e as Error).message}`);
+    }
+  };
   const duplicate = async (id: string) => {
     await api(`/api/quizzes/${id}/duplicate`, { method: 'POST' });
     load();
@@ -79,9 +95,15 @@ export default function Dashboard() {
             <h1 className="text-3xl font-extrabold tracking-tight">Quizzes</h1>
             <p className="text-navy/55">Your question banks. Start a live session from any quiz.</p>
           </div>
-          <button className="btn btn-navy" onClick={createQuiz}>
-            <Plus className="size-5" /> New quiz
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <label className="btn btn-ghost" title="Create a quiz from a JSON file (same format as Export JSON)">
+              <FileUp className="size-5" /> Import quiz
+              <input type="file" accept=".json,application/json" className="sr-only" onChange={(e) => importQuiz(e.target.files?.[0], e.target)} />
+            </label>
+            <button className="btn btn-navy" onClick={createQuiz}>
+              <Plus className="size-5" /> New quiz
+            </button>
+          </div>
         </div>
         {!quizzes ? (
           <Spinner className="size-6 text-navy/40" />

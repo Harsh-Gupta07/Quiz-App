@@ -1,0 +1,162 @@
+{
+  "title": "Claude AI Workshop Quiz",
+  "description": "Prompting, Projects, Web Search, Skills, Artifacts, Connectors and MCP — scenario-based, medium level.",
+  "timerSeconds": 15,
+  "questions": [
+    {
+      "text": "A student has uploaded syllabus PDFs, class notes, and previous-year papers and wants all related conversations to remain organized in one place. Which Claude feature fits best?",
+      "options": ["Artifact", "Project", "Web Search", "Connector"],
+      "correct": "B",
+      "explanation": "A Project keeps files, instructions and related chats together in one place."
+    },
+    {
+      "text": "Every time you give Claude Java code, you want it to explain line-by-line, mention common mistakes, and finish with a practice question. You don't want to repeat these instructions. What should you create?",
+      "options": ["Project", "Artifact", "Skill", "Connector"],
+      "correct": "C",
+      "explanation": "A Skill packages reusable instructions that Claude applies whenever the task comes up."
+    },
+    {
+      "text": "You ask Claude to create an interactive placement dashboard with buttons, progress tracking, and editable content. Which feature is most suitable?",
+      "options": ["Artifact", "Project", "Web Search", "Memory"],
+      "correct": "A",
+      "explanation": "Artifacts are for standalone, interactive content such as apps and dashboards."
+    },
+    {
+      "text": "You ask: \"What are the latest AI hiring trends this month?\" Which Claude capability is most important for this task?",
+      "options": ["Project", "Skill", "Web Search", "Artifact"],
+      "correct": "C",
+      "explanation": "Recent, changing information needs live Web Search."
+    },
+    {
+      "text": "Your resume is already stored in Google Drive and you want Claude to access it through an available supported integration. What should you use?",
+      "options": ["Few-Shot Prompting", "Connector / Connected App", "Artifact", "Project"],
+      "correct": "B",
+      "explanation": "Connectors let Claude access data in apps like Google Drive."
+    },
+    {
+      "text": "Which statement best describes MCP?",
+      "options": [
+        "A feature used only for generating presentations",
+        "A type of Claude Project",
+        "A standard way for AI applications to connect with tools and data sources",
+        "A prompting technique"
+      ],
+      "correct": "C",
+      "explanation": "MCP (Model Context Protocol) is an open standard for connecting AI apps to tools and data."
+    },
+    {
+      "text": "You first show Claude two examples of professionally written emails, then ask it to write a similar email to your HOD. Which prompting style are you using?",
+      "options": ["Zero-Shot", "Few-Shot", "Role Prompting", "Web Search"],
+      "correct": "B",
+      "explanation": "Giving examples before the task is Few-Shot prompting."
+    },
+    {
+      "text": "You prompt: \"Act as a senior college student and help me create a realistic routine balancing classes, study, friends, and free time.\" Which prompting technique is this?",
+      "options": ["Zero-Shot Prompting", "Few-Shot Prompting", "Role Prompting", "Project Prompting"],
+      "correct": "C",
+      "explanation": "\"Act as…\" assigns Claude a role — Role Prompting."
+    },
+    {
+      "text": "In the ACT prompting approach, which part controls whether Claude should respond formally, casually, humorously, or professionally?",
+      "options": ["Action", "Context", "Tone", "Example"],
+      "correct": "C",
+      "explanation": "ACT = Action, Context, Tone. Tone sets the style of the response."
+    },
+    {
+      "text": "You have separate Claude Projects for DBMS, Java, and Placement Preparation. You want the same \"beginner-friendly explanation style\" available across multiple tasks. What is the better solution?",
+      "options": ["Create the same Project again", "Create a reusable Skill", "Use Web Search", "Create an Artifact"],
+      "correct": "B",
+      "explanation": "A Skill can be reused across Projects and tasks; Project instructions stay inside one Project."
+    },
+    {
+      "text": "Why would you set custom instructions inside a Claude Project?",
+      "options": [
+        "To define how Claude should behave specifically for that Project",
+        "To connect Claude to the internet",
+        "To automatically create an MCP server",
+        "To increase internet speed"
+      ],
+      "correct": "A",
+      "explanation": "Project instructions shape Claude's behaviour for every chat in that Project."
+    },
+    {
+      "text": "Claude provides an answer using live web information with source links. What should you do before using that information in an assignment?",
+      "options": ["Trust it automatically", "Remove the citations", "Verify the cited sources", "Convert it into an Artifact first"],
+      "correct": "C",
+      "explanation": "Citations are there so you can check the original sources."
+    },
+    {
+      "text": "When connecting Claude to an external service, what is the safest approach?",
+      "options": [
+        "Give Claude access to everything",
+        "Share your password directly in the chat",
+        "Grant only the permissions needed for the task",
+        "Store login credentials inside a Skill"
+      ],
+      "correct": "C",
+      "explanation": "Least privilege: grant only what the task needs."
+    },
+    {
+      "text": "Which file normally contains the main instructions for a Claude Skill?",
+      "options": ["index.html", "package.json", "SKILL.md", "README.java"],
+      "correct": "C",
+      "explanation": "SKILL.md holds the skill's name, description and instructions."
+    },
+    {
+      "text": "Why might a student create separate Projects for \"DBMS Notes\" and \"Placement Prep\"?",
+      "options": [
+        "To keep their files, instructions, and conversations organized around separate goals",
+        "To get unlimited Claude usage",
+        "To automatically enable MCP",
+        "To make Claude respond faster"
+      ],
+      "correct": "A",
+      "explanation": "Separate Projects keep context focused on each goal."
+    },
+    {
+      "text": "You want Claude to read your resume from Google Drive and then create an interactive resume-review report. Which combination makes the most sense?",
+      "options": ["Web Search + Memory", "Connector + Artifact", "Few-Shot + Project only", "MCP + Zero-Shot only"],
+      "correct": "B",
+      "explanation": "The Connector reads the resume; the Artifact presents the interactive report."
+    },
+    {
+      "text": "Your Project contains your own placement notes, but you also want Claude to compare them with the latest industry hiring trends. What is the best approach?",
+      "options": [
+        "Use only the Project",
+        "Delete the Project and use Web Search",
+        "Use Project context together with Web Search",
+        "Create only an Artifact"
+      ],
+      "correct": "C",
+      "explanation": "Combine your own Project context with fresh information from Web Search."
+    },
+    {
+      "text": "Why is MCP sometimes compared to \"USB-C for AI\"?",
+      "options": [
+        "It is a physical cable for AI systems",
+        "It provides a common standard for connecting AI applications with different tools and data sources",
+        "It increases Claude's model size",
+        "It stores Claude conversations offline"
+      ],
+      "correct": "B",
+      "explanation": "Like USB-C, MCP is one common connector standard that works across many tools."
+    },
+    {
+      "text": "You simply ask Claude: \"Explain the difference between RAM and ROM in simple words.\" You don't need files, external apps, or reusable instructions. What is the simplest choice?",
+      "options": ["Normal Chat", "Project", "Skill", "MCP"],
+      "correct": "A",
+      "explanation": "A simple one-off question needs nothing more than a normal chat."
+    },
+    {
+      "text": "Workflow challenge: A student wants to keep placement notes and resume files organized, reuse the same interview-evaluation rules, access a resume stored in a connected app, and create an interactive interview scorecard. Which workflow is the best fit?",
+      "options": [
+        "Web Search → Memory → Chat",
+        "Project → Skill → Connector → Artifact",
+        "Artifact → Web Search → Project",
+        "Memory → Connector → Zero-Shot"
+      ],
+      "correct": "B",
+      "explanation": "Project (organize) → Skill (reusable rules) → Connector (resume) → Artifact (scorecard)."
+    }
+  ]
+}

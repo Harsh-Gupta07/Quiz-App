@@ -107,6 +107,8 @@ JSON:
 ```
 `correct` accepts `A`–`D`, `1`–`4`, or the exact option text.
 
+To create a whole quiz from a file (title, timer and questions), use **Import quiz** on the dashboard. It accepts the same JSON that **Export JSON** produces, e.g. the ready-made [`quizzes/claude-workshop-quiz.json`](quizzes/claude-workshop-quiz.json) (20 workshop questions on Projects, Skills, Artifacts, Web Search, Connectors and MCP).
+
 Sessions take a **snapshot** of the questions when the quiz starts, so editing a quiz never disturbs a game in progress or the results of past games.
 
 ---

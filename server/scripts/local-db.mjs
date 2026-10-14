@@ -26,6 +26,8 @@ const pg = new EmbeddedPostgres({
   password: 'scalive',
   port,
   persistent: true,
+  // Always UTF-8: Windows otherwise defaults to WIN1252, which cannot store characters like → or emoji.
+  initdbFlags: ['--encoding=UTF8', '--locale=C'],
   onLog: () => {},
   onError: (msg) => {
     const text = String(msg ?? '').trim();
@@ -40,12 +42,22 @@ if (!initialised) {
 }
 
 await pg.start();
-try {
-  await pg.createDatabase(database);
-  console.log(`[db] Created database "${database}"`);
-} catch {
-  // already exists
+const client = pg.getPgClient();
+await client.connect();
+const existing = await client.query(
+  'SELECT pg_encoding_to_char(encoding) AS enc FROM pg_database WHERE datname = $1',
+  [database],
+);
+if (existing.rowCount === 0) {
+  await client.query(`CREATE DATABASE ${database} ENCODING 'UTF8' TEMPLATE template0 LC_COLLATE 'C' LC_CTYPE 'C'`);
+  console.log(`[db] Created database "${database}" (UTF-8)`);
+} else if (existing.rows[0].enc !== 'UTF8') {
+  console.warn(
+    `[db] WARNING: database "${database}" uses ${existing.rows[0].enc}, not UTF-8 — symbols like → cannot be saved.\n` +
+      `[db] Stop this, delete ${baseDir} and run "npm run db:local" again to recreate it.`,
+  );
 }
+await client.end();
 console.log(`[db] PostgreSQL ready → postgresql://scalive:scalive@127.0.0.1:${port}/${database}`);
 console.log('[db] Press Ctrl+C to stop.');
 
