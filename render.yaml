@@ -1,0 +1,29 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# One web service (must stay at ONE instance: live game state is held in memory) + PostgreSQL.
+services:
+  - type: web
+    name: scalive-quiz-arena
+    runtime: node
+    plan: starter            # free plan sleeps when idle — wake it before class or use starter
+    numInstances: 1
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: scalive-quiz-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false          # you will be prompted for it
+      - key: PUBLIC_URL
+        sync: false          # e.g. https://scalive-quiz-arena.onrender.com or your own domain
+databases:
+  - name: scalive-quiz-db
+    plan: basic-256mb

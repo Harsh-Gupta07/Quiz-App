@@ -1,0 +1,27 @@
+{
+  "name": "scalive-quiz-arena",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SCALive Quiz Arena — real-time classroom quiz platform for Sharma Computer Academy, Bhopal",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "db:local": "node server/scripts/local-db.mjs",
+    "dev": "concurrently -k -n server,client -c auto \"npm run dev -w server\" \"npm run dev -w client\"",
+    "dev:local": "concurrently -k -n db,app -c auto \"npm run db:local\" \"wait-on tcp:127.0.0.1:5433 && npm run db:migrate && npm run dev\"",
+    "db:migrate": "npm run migrate:deploy -w server",
+    "db:migrate:dev": "npm run migrate:dev -w server",
+    "db:seed": "npm run seed -w server",
+    "build": "npm run build -w server && npm run build -w client",
+    "start": "npm run db:migrate && npm run start -w server",
+    "test": "npm run test -w server",
+    "test:integration": "npm run test:integration -w server",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w client",
+    "start:server": "npm run start -w server"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

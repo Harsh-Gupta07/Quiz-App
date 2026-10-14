@@ -1,0 +1,109 @@
+@import 'tailwindcss';
+
+/* ───────────── SCALive design tokens ───────────── */
+@theme {
+  --color-ivory: #faf9f5;
+  --color-ivory-deep: #f2efe7;
+  --color-sand: #e8e3d6;
+  --color-navy: #14213d;
+  --color-navy-light: #26375c;
+  --color-orange: #d97757;
+  --color-orange-deep: #c25f3e;
+  --color-orange-soft: #f6e3da;
+  --color-blue: #6a9bcc;
+  --color-blue-deep: #4b7fb3;
+  --color-blue-soft: #e1ebf5;
+  --color-green: #788c5d;
+  --color-green-deep: #5f7247;
+  --color-green-soft: #e6ebdf;
+  --color-gold: #d4a72c;
+  --color-silver: #98a2b3;
+  --color-bronze: #b8784a;
+  --color-danger: #c2412d;
+
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --shadow-soft: 0 1px 2px rgb(20 33 61 / 0.04), 0 10px 30px -12px rgb(20 33 61 / 0.14);
+  --shadow-lift: 0 2px 6px rgb(20 33 61 / 0.06), 0 24px 48px -16px rgb(20 33 61 / 0.28);
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-soft: pulse-soft 2.4s ease-in-out infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(0.92); }
+  }
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ivory);
+  color: var(--color-navy);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgb(217 119 87 / 0.25);
+}
+
+@layer components {
+  .card {
+    @apply rounded-3xl bg-white shadow-soft ring-1 ring-navy/5;
+  }
+  .btn {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl px-5 py-3 text-[15px] font-semibold transition select-none active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45 focus-visible:outline-none focus-visible:ring-4;
+  }
+  .btn-primary {
+    @apply bg-orange text-white shadow-soft hover:bg-orange-deep focus-visible:ring-orange/30;
+  }
+  .btn-navy {
+    @apply bg-navy text-white shadow-soft hover:bg-navy-light focus-visible:ring-navy/25;
+  }
+  .btn-ghost {
+    @apply bg-white text-navy ring-1 ring-navy/10 hover:bg-ivory-deep focus-visible:ring-navy/20;
+  }
+  .btn-danger {
+    @apply bg-white text-danger ring-1 ring-danger/25 hover:bg-danger/5 focus-visible:ring-danger/20;
+  }
+  .input {
+    @apply w-full rounded-2xl border-0 bg-ivory px-4 py-3 text-[16px] text-navy ring-1 ring-navy/10 transition placeholder:text-navy/35 focus:bg-white focus:ring-2 focus:ring-orange focus:outline-none;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-semibold text-navy/70;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+  .kbd {
+    @apply inline-flex min-w-6 items-center justify-center rounded-md bg-white px-1.5 py-0.5 font-mono text-[11px] font-bold text-navy/70 shadow-[0_1px_0_1px_rgb(20_33_61/0.15)];
+  }
+}
+
+/* Subtle dotted backdrop used on the presentation + student screens */
+.bg-dots {
+  background-image: radial-gradient(rgb(20 33 61 / 0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

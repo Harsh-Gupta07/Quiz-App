@@ -1,0 +1,117 @@
+// SCALive Quiz Arena — database schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// A reusable quiz (question bank) that can be played many times.
+model Quiz {
+  id           String        @id @default(cuid())
+  title        String
+  description  String?
+  timerSeconds Int           @default(15)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  questions    Question[]
+  sessions     QuizSession[]
+}
+
+model Question {
+  id          String  @id @default(cuid())
+  quizId      String
+  quiz        Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  position    Int
+  text        String
+  optionA     String
+  optionB     String
+  optionC     String
+  optionD     String
+  /// One of "A" | "B" | "C" | "D"
+  correct     String
+  explanation String?
+
+  @@index([quizId, position])
+}
+
+enum SessionStatus {
+  LOBBY
+  NEXT_QUESTION
+  QUESTION_ACTIVE
+  TIME_UP
+  ANSWER_REVEAL
+  LEADERBOARD
+  FINISHED
+}
+
+/// One live play-through of a quiz.
+model QuizSession {
+  id                String        @id @default(cuid())
+  /// 6-character joining code
+  code              String        @unique
+  quizId            String?
+  quiz              Quiz?         @relation(fields: [quizId], references: [id], onDelete: SetNull)
+  title             String
+  status            SessionStatus @default(LOBBY)
+  /// Incremented on every state transition; guards against double-advancing.
+  stateVersion      Int           @default(0)
+  currentIndex      Int           @default(-1)
+  /// Highest question index whose results have been revealed (scores visible up to here).
+  revealedIndex     Int           @default(-1)
+  timerSeconds      Int
+  lockJoinOnStart   Boolean       @default(true)
+  /// Frozen copy of the questions (taken when the quiz starts) so edits never break a live game.
+  questions         Json
+  questionStartedAt DateTime?
+  questionEndsAt    DateTime?
+  createdAt         DateTime      @default(now())
+  startedAt         DateTime?
+  endedAt           DateTime?
+  participants      Participant[]
+  responses         Response[]
+
+  @@index([createdAt])
+}
+
+model Participant {
+  id         String      @id @default(cuid())
+  sessionId  String
+  session    QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  name       String
+  /// Normalised name used to prevent duplicate names within a session
+  nameKey    String
+  rollNo     String?
+  /// SHA-256 of the participant's secret reconnect token
+  tokenHash  String      @unique
+  joinedAt   DateTime    @default(now())
+  lastSeenAt DateTime    @default(now())
+  responses  Response[]
+
+  @@unique([sessionId, nameKey])
+  @@index([sessionId])
+}
+
+model Response {
+  id             String      @id @default(cuid())
+  sessionId      String
+  session        QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  participantId  String
+  participant    Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  questionIndex  Int
+  questionId     String
+  /// "A" | "B" | "C" | "D"
+  choice         String
+  isCorrect      Boolean
+  /// Server receive time minus server question start time
+  responseTimeMs Int
+  points         Int
+  receivedAt     DateTime
+
+  /// Database-level guarantee: one answer per participant per question
+  @@unique([participantId, questionIndex])
+  @@index([sessionId, questionIndex])
+}
