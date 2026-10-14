@@ -109,6 +109,8 @@ JSON:
 
 To create a whole quiz from a file (title, timer and questions), use **Import quiz** on the dashboard. It accepts the same JSON that **Export JSON** produces, e.g. the ready-made [`quizzes/claude-workshop-quiz.json`](quizzes/claude-workshop-quiz.json) (20 workshop questions on Projects, Skills, Artifacts, Web Search, Connectors and MCP).
 
+**Bundled quizzes:** every `.json` file in the `quizzes/` folder is added to the database automatically when the server starts, once per file. Deleting such a quiz later does not bring it back, and a quiz with the same title is never duplicated. To ship a new quiz to the live site, add its file to `quizzes/` and push. Set `SEED_BUNDLED_QUIZZES=false` to turn this off.
+
 Sessions take a **snapshot** of the questions when the quiz starts, so editing a quiz never disturbs a game in progress or the results of past games.
 
 ---

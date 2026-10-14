@@ -2,6 +2,7 @@ import { config, lanAddresses } from './lib/config';
 import { prisma } from './lib/db';
 import { createApp } from './app';
 import { seedIfEmpty } from './seed/seedDemoQuiz';
+import { seedBundledQuizzes } from './seed/bundledQuizzes';
 
 async function main() {
   const { server, io, manager } = createApp();
@@ -16,6 +17,7 @@ async function main() {
 
   try {
     if (await seedIfEmpty(prisma)) console.log('  New database detected — added the 20-question Claude AI demo quiz.');
+    for (const title of await seedBundledQuizzes(prisma)) console.log(`  Added bundled quiz: ${title}`);
     const resumed = await manager.resumeActive();
     if (resumed) console.log(`  Resumed ${resumed} in-progress session(s).`);
   } catch (err) {

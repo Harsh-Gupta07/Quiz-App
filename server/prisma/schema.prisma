@@ -95,6 +95,12 @@ model Participant {
   @@index([sessionId])
 }
 
+/// Remembers which bundled quiz files (quizzes/*.json) were already added, so deleting one never brings it back.
+model SeedRecord {
+  key       String   @id
+  createdAt DateTime @default(now())
+}
+
 model Response {
   id             String      @id @default(cuid())
   sessionId      String
