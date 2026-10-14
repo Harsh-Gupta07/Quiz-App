@@ -4,7 +4,7 @@ services:
   - type: web
     name: scalive-quiz-arena
     runtime: node
-    plan: starter            # free plan sleeps when idle — wake it before class or use starter
+    plan: free               # sleeps after ~15 min idle: open the site a few minutes before class (or upgrade to starter)
     numInstances: 1
     buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
@@ -26,4 +26,4 @@ services:
         sync: false          # e.g. https://scalive-quiz-arena.onrender.com or your own domain
 databases:
   - name: scalive-quiz-db
-    plan: basic-256mb
+    plan: free               # free Render Postgres expires after 30 days — or point DATABASE_URL at a free Neon database
