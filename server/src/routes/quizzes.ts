@@ -7,6 +7,7 @@ import { createSessionSchema, quizInputSchema, type QuestionInput } from '../lib
 import { parseQuestions } from '../lib/importer';
 import { generateJoinCode } from '../lib/codes';
 import { loadQuizSnapshot } from '../game/engine';
+import { TIMER_OPTIONS } from '../shared/protocol';
 
 export const quizRouter = Router();
 quizRouter.use(requireAdmin);
@@ -197,7 +198,7 @@ quizRouter.get('/:id/export', async (req, res) => {
 quizRouter.post('/:id/sessions', async (req, res) => {
   const parsed = createSessionSchema.safeParse(req.body ?? {});
   if (!parsed.success) {
-    res.status(400).json({ error: 'Timer must be 10 or 15 seconds.' });
+    res.status(400).json({ error: `Timer must be ${TIMER_OPTIONS.join(', ')} seconds.` });
     return;
   }
   const quiz = await prisma.quiz.findUnique({ where: { id: req.params.id } });

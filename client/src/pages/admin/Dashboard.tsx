@@ -1,9 +1,46 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChartColumn, CopyPlus, FileUp, Pencil, Play, Plus, Presentation, Trash2, Users } from 'lucide-react';
+import { ChartColumn, CopyPlus, FileJson, FileUp, Pencil, Play, Plus, Presentation, Trash2, Users } from 'lucide-react';
 import { DEFAULT_TIMER, TIMER_OPTIONS, toTimerOption, type TimerSeconds } from '@shared/protocol';
 import { api } from '../../lib/api';
 import { ErrorNote, Modal, Spinner } from '../../components/ui';
+
+/**
+ * A fill-in-the-blanks quiz file. `_readme` documents every field and the limits the
+ * server enforces; it is ignored on import, so the file can be edited and imported as-is.
+ */
+const QUIZ_TEMPLATE = {
+  _readme: {
+    howToUse: 'Edit the values below, save the file, then use "Import quiz" on the dashboard. Delete this _readme block if you like — it is ignored either way.',
+    title: 'Required. The quiz name, up to 120 characters.',
+    description: 'Optional. Up to 500 characters. Use null or delete the line if you do not want one.',
+    timerSeconds: `Seconds allowed per question. Must be one of: ${TIMER_OPTIONS.join(', ')}. Defaults to ${DEFAULT_TIMER}.`,
+    questions: 'Required. Between 1 and 200 of them, asked in the order listed here.',
+    'questions[].text': 'Required. The question itself, up to 500 characters.',
+    'questions[].options': 'Required. Exactly 4 answers, in order A, B, C, D. Each up to 200 characters, none left blank.',
+    'questions[].correct': 'Required. Which option is right: "A", "B", "C" or "D".',
+    'questions[].explanation': 'Optional. Shown after the answer is revealed, up to 600 characters. Use null for none.',
+  },
+  title: 'My quiz title',
+  description: 'A short line about this quiz — or null.',
+  timerSeconds: DEFAULT_TIMER,
+  questions: [
+    {
+      text: 'Which prompting technique gives Claude worked examples?',
+      options: ['Zero-shot', 'Few-shot', 'Role prompting', 'Chaining'],
+      correct: 'B',
+      explanation: 'Few-shot means putting examples directly in the prompt.',
+    },
+    {
+      text: 'Replace this with your second question.',
+      options: ['First answer', 'Second answer', 'Third answer', 'Fourth answer'],
+      correct: 'A',
+      explanation: null,
+    },
+  ],
+};
+
+const TEMPLATE_HREF = `data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(QUIZ_TEMPLATE, null, 2))}`;
 
 interface QuizSummary {
   id: string;
@@ -97,6 +134,9 @@ export default function Dashboard() {
             <p className="text-navy/55">Your question banks. Start a live session from any quiz.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <a className="btn btn-ghost" href={TEMPLATE_HREF} download="scalive-quiz-template.json" title="Download a blank quiz file with every field explained, then fill it in and import it">
+              <FileJson className="size-5" /> Format template
+            </a>
             <label className="btn btn-ghost" title="Create a quiz from a JSON file (same format as Export JSON)">
               <FileUp className="size-5" /> Import quiz
               <input type="file" accept=".json,application/json" className="sr-only" onChange={(e) => importQuiz(e.target.files?.[0], e.target)} />
