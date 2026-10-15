@@ -6,6 +6,15 @@
 export const OPTION_KEYS = ['A', 'B', 'C', 'D'] as const;
 export type OptionKey = (typeof OPTION_KEYS)[number];
 
+/** Seconds per question the instructor may choose. */
+export const TIMER_OPTIONS = [15, 30, 60] as const;
+export type TimerSeconds = (typeof TIMER_OPTIONS)[number];
+export const DEFAULT_TIMER: TimerSeconds = 15;
+
+/** Coerce a stored timer (which may predate the current options) to a selectable one. */
+export const toTimerOption = (value: unknown): TimerSeconds =>
+  TIMER_OPTIONS.find((t) => t === value) ?? DEFAULT_TIMER;
+
 export const SESSION_STATUSES = [
   'LOBBY',
   'NEXT_QUESTION',

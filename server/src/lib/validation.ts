@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { OPTION_KEYS } from '../shared/protocol';
+import { DEFAULT_TIMER, OPTION_KEYS, TIMER_OPTIONS } from '../shared/protocol';
 
 const text = (max: number) => z.string().trim().min(1, 'Required').max(max);
 
-export const timerSchema = z.union([z.literal(10), z.literal(15)]);
+export const timerSchema = z.union([z.literal(TIMER_OPTIONS[0]), z.literal(TIMER_OPTIONS[1]), z.literal(TIMER_OPTIONS[2])]);
 
 export const questionInputSchema = z.object({
   id: z.string().optional(),
@@ -29,7 +29,7 @@ export const quizInputSchema = z.object({
     .optional()
     .nullable()
     .transform((v) => (v ? v : null)),
-  timerSeconds: timerSchema.default(15),
+  timerSeconds: timerSchema.default(DEFAULT_TIMER),
   questions: z.array(questionInputSchema).max(200).default([]),
 });
 export type QuizInput = z.infer<typeof quizInputSchema>;

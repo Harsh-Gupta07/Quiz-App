@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ChevronDown, ChevronUp, CopyPlus, Download, FileUp, Plus, Save, Trash2 } from 'lucide-react';
-import { OPTION_KEYS, type OptionKey } from '@shared/protocol';
+import { DEFAULT_TIMER, OPTION_KEYS, TIMER_OPTIONS, toTimerOption, type OptionKey, type TimerSeconds } from '@shared/protocol';
 import { api, ApiError } from '../../lib/api';
 import { ErrorNote, Modal, OPTION_STYLE, OptionIcon, Spinner } from '../../components/ui';
 
@@ -39,7 +39,7 @@ export default function QuizEditor() {
   const { id = '' } = useParams();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [timer, setTimer] = useState<10 | 15>(15);
+  const [timer, setTimer] = useState<TimerSeconds>(DEFAULT_TIMER);
   const [questions, setQuestions] = useState<EditQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [dirty, setDirty] = useState(false);
@@ -50,7 +50,7 @@ export default function QuizEditor() {
   const apply = (q: QuizData) => {
     setTitle(q.title);
     setDescription(q.description ?? '');
-    setTimer(q.timerSeconds === 10 ? 10 : 15);
+    setTimer(toTimerOption(q.timerSeconds));
     setQuestions(q.questions.map(fromServer));
     setDirty(false);
   };
@@ -171,7 +171,7 @@ export default function QuizEditor() {
           <div>
             <div className="label">Default timer</div>
             <div className="flex gap-2">
-              {([10, 15] as const).map((t) => (
+              {TIMER_OPTIONS.map((t) => (
                 <button key={t} type="button" className={`btn px-4 py-2 ${timer === t ? 'btn-navy' : 'btn-ghost'}`} onClick={() => (setTimer(t), touch())}>
                   {t}s
                 </button>

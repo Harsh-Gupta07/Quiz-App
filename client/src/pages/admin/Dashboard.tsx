@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChartColumn, CopyPlus, FileUp, Pencil, Play, Plus, Presentation, Trash2, Users } from 'lucide-react';
+import { DEFAULT_TIMER, TIMER_OPTIONS, toTimerOption, type TimerSeconds } from '@shared/protocol';
 import { api } from '../../lib/api';
 import { ErrorNote, Modal, Spinner } from '../../components/ui';
 
@@ -52,7 +53,7 @@ export default function Dashboard() {
   useEffect(load, []);
 
   const createQuiz = async () => {
-    const quiz = await api<{ id: string }>('/api/quizzes', { method: 'POST', json: { title: 'Untitled quiz', timerSeconds: 15, questions: [] } });
+    const quiz = await api<{ id: string }>('/api/quizzes', { method: 'POST', json: { title: 'Untitled quiz', timerSeconds: DEFAULT_TIMER, questions: [] } });
     navigate(`/admin/quiz/${quiz.id}`);
   };
   /** Creates a whole quiz (title, timer, questions) from a JSON file such as one made by "Export JSON". */
@@ -63,8 +64,8 @@ export default function Dashboard() {
     try {
       const data = JSON.parse(await file.text());
       const body = Array.isArray(data)
-        ? { title: file.name.replace(/\.json$/i, ''), timerSeconds: 15, questions: data }
-        : { title: data.title || file.name.replace(/\.json$/i, ''), description: data.description, timerSeconds: data.timerSeconds === 10 ? 10 : 15, questions: data.questions ?? [] };
+        ? { title: file.name.replace(/\.json$/i, ''), timerSeconds: DEFAULT_TIMER, questions: data }
+        : { title: data.title || file.name.replace(/\.json$/i, ''), description: data.description, timerSeconds: toTimerOption(data.timerSeconds), questions: data.questions ?? [] };
       const quiz = await api<{ id: string; questions: unknown[] }>('/api/quizzes', { method: 'POST', json: body });
       navigate(`/admin/quiz/${quiz.id}`);
     } catch (e) {
@@ -204,14 +205,14 @@ export default function Dashboard() {
 }
 
 function LaunchDialog({ quiz, onClose }: { quiz: QuizSummary | null; onClose: () => void }) {
-  const [timer, setTimer] = useState<10 | 15>(15);
+  const [timer, setTimer] = useState<TimerSeconds>(DEFAULT_TIMER);
   const [lock, setLock] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (quiz) setTimer(quiz.timerSeconds === 10 ? 10 : 15);
+    if (quiz) setTimer(toTimerOption(quiz.timerSeconds));
   }, [quiz]);
 
   const start = async () => {
@@ -237,8 +238,8 @@ function LaunchDialog({ quiz, onClose }: { quiz: QuizSummary | null; onClose: ()
           </p>
           <div>
             <div className="label">Time per question</div>
-            <div className="grid grid-cols-2 gap-2">
-              {([10, 15] as const).map((t) => (
+            <div className="grid grid-cols-3 gap-2">
+              {TIMER_OPTIONS.map((t) => (
                 <button key={t} type="button" onClick={() => setTimer(t)} className={`btn ${timer === t ? 'btn-navy' : 'btn-ghost'}`}>
                   {t} seconds
                 </button>

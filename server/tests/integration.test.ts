@@ -115,7 +115,7 @@ describe('live quiz end-to-end', () => {
       method: 'POST',
       body: JSON.stringify({
         title: 'Integration Test Quiz',
-        timerSeconds: 10,
+        timerSeconds: 15,
         questions: [
           { text: 'Q1: pick B', options: ['a', 'b', 'c', 'd'], correct: 'B' },
           { text: 'Q2: pick A', options: ['a', 'b', 'c', 'd'], correct: 'A' },
@@ -127,7 +127,7 @@ describe('live quiz end-to-end', () => {
     quizId = quiz.body.id;
     const session = await api(`/api/quizzes/${quizId}/sessions`, {
       method: 'POST',
-      body: JSON.stringify({ timerSeconds: 10, lockJoinOnStart: true }),
+      body: JSON.stringify({ timerSeconds: 15, lockJoinOnStart: true }),
     });
     expect(session.status).toBe(201);
     ({ id: sessionId, code } = session.body);
