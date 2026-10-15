@@ -6,13 +6,7 @@ import type { OptionKey } from '@shared/protocol';
 // ───────────────────────── Brand ─────────────────────────
 
 export function LogoMark({ size = 36, className = '' }: { size?: number; className?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 64 64" className={className} aria-hidden>
-      <rect width="64" height="64" rx="16" fill="#14213D" />
-      <path d="M32 12 50 22v20L32 52 14 42V22z" fill="none" stroke="#D97757" strokeWidth="5" strokeLinejoin="round" />
-      <circle cx="32" cy="32" r="7" fill="#FAF9F5" />
-    </svg>
-  );
+  return <img src="/scalive-logo.png" alt="SCALive — Sharma Computer Academy" height={size} style={{ height: size }} className={`w-auto ${className}`} />;
 }
 
 export function Brand({
@@ -24,7 +18,7 @@ export function Brand({
   tone?: 'dark' | 'light';
   subtitle?: string | null;
 }) {
-  const dims = { sm: [28, 'text-base', 'text-[10px]'], md: [38, 'text-xl', 'text-xs'], lg: [56, 'text-3xl', 'text-sm'], xl: [84, 'text-5xl', 'text-xl'] }[size] as [
+  const dims = { sm: [32, 'text-base', 'text-[10px]'], md: [44, 'text-xl', 'text-xs'], lg: [64, 'text-3xl', 'text-sm'], xl: [96, 'text-5xl', 'text-xl'] }[size] as [
     number,
     string,
     string,
@@ -32,16 +26,11 @@ export function Brand({
   return (
     <div className="flex items-center gap-3">
       <LogoMark size={dims[0]} />
-      <div className="leading-none">
-        <div className={`${dims[1]} font-extrabold tracking-tight ${tone === 'dark' ? 'text-navy' : 'text-white'}`}>
-          SCA<span className="text-orange">Live</span>
+      {subtitle && (
+        <div className={`border-l pl-3 leading-none ${tone === 'dark' ? 'border-navy/15' : 'border-white/20'}`}>
+          <div className={`${dims[2]} font-semibold uppercase tracking-[0.18em] ${tone === 'dark' ? 'text-navy/50' : 'text-white/60'}`}>{subtitle}</div>
         </div>
-        {subtitle && (
-          <div className={`${dims[2]} mt-1 font-semibold uppercase tracking-[0.18em] ${tone === 'dark' ? 'text-navy/50' : 'text-white/60'}`}>
-            {subtitle}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
