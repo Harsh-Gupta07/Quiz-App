@@ -23,7 +23,7 @@ Requirements: **Node.js 20+** and a MySQL 8+ database (local or hosted).
 
 ```bash
 npm install                      # installs everything (both workspaces)
-cp .env.example .env             # then set ADMIN_PASSWORD and SESSION_SECRET
+# Create a private `.env` file with DATABASE_URL, ADMIN_PASSWORD and SESSION_SECRET.
 
 npm run db:migrate               # create tables
 npm run db:seed                  # add the 20 Claude AI workshop questions
