@@ -5,15 +5,15 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 /// A reusable quiz (question bank) that can be played many times.
 model Quiz {
   id           String        @id @default(cuid())
-  title        String
-  description  String?
+  title        String        @db.VarChar(255)
+  description  String?       @db.Text
   timerSeconds Int           @default(15)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -26,14 +26,14 @@ model Question {
   quizId      String
   quiz        Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade)
   position    Int
-  text        String
-  optionA     String
-  optionB     String
-  optionC     String
-  optionD     String
+  text        String  @db.Text
+  optionA     String  @db.Text
+  optionB     String  @db.Text
+  optionC     String  @db.Text
+  optionD     String  @db.Text
   /// One of "A" | "B" | "C" | "D"
-  correct     String
-  explanation String?
+  correct     String  @db.Char(1)
+  explanation String? @db.Text
 
   @@index([quizId, position])
 }
@@ -55,7 +55,7 @@ model QuizSession {
   code              String        @unique
   quizId            String?
   quiz              Quiz?         @relation(fields: [quizId], references: [id], onDelete: SetNull)
-  title             String
+  title             String        @db.VarChar(255)
   status            SessionStatus @default(LOBBY)
   /// Incremented on every state transition; guards against double-advancing.
   stateVersion      Int           @default(0)
@@ -81,10 +81,10 @@ model Participant {
   id         String      @id @default(cuid())
   sessionId  String
   session    QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  name       String
+  name       String      @db.VarChar(255)
   /// Normalised name used to prevent duplicate names within a session
   nameKey    String
-  rollNo     String?
+  rollNo     String?     @db.VarChar(100)
   /// SHA-256 of the participant's secret reconnect token
   tokenHash  String      @unique
   joinedAt   DateTime    @default(now())
@@ -110,7 +110,7 @@ model Response {
   questionIndex  Int
   questionId     String
   /// "A" | "B" | "C" | "D"
-  choice         String
+  choice         String      @db.Char(1)
   isCorrect      Boolean
   /// Server receive time minus server question start time
   responseTimeMs Int

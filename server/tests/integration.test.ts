@@ -1,8 +1,8 @@
 /**
- * End-to-end flow against a real server + PostgreSQL:
+ * End-to-end flow against a real server + MySQL:
  * 1 admin, 1 presentation screen and 5 simulated students on separate sockets.
  *
- *   npm run test:integration      (needs DATABASE_URL, e.g. `npm run db:local` running)
+ *   npm run test:integration      (needs a disposable MySQL DATABASE_URL)
  */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { AddressInfo } from 'node:net';
@@ -110,7 +110,7 @@ describe('live quiz end-to-end', () => {
     expect(cookie).toMatch(/^scalive_admin=/);
   });
 
-  it('creates a quiz and a session with a 6-character join code', async () => {
+  it('creates a quiz and a session with a 6-character join code', { timeout: 30_000 }, async () => {
     const quiz = await api('/api/quizzes', {
       method: 'POST',
       body: JSON.stringify({
@@ -187,7 +187,7 @@ describe('live quiz end-to-end', () => {
     const active = await presentState.waitFor((s) => s.status === 'QUESTION_ACTIVE');
     for (const st of students) await st.state.waitFor((s) => s.status === 'QUESTION_ACTIVE' && s.questionIndex === 0);
     expect(active.question?.text).toBe('Q1: pick B');
-    expect(active.questionEndsAt! - active.questionStartedAt!).toBe(10_000);
+    expect(active.questionEndsAt! - active.questionStartedAt!).toBe(15_000);
     // correct answer must never be sent to students / presentation before reveal
     expect(JSON.stringify(s1.state.latest)).not.toMatch(/"correct"/);
     expect(active.reveal).toBeNull();

@@ -9,9 +9,11 @@
     "start": "node dist/index.js",
     "migrate:dev": "dotenv -e ../.env -- prisma migrate dev",
     "migrate:deploy": "dotenv -e ../.env -- prisma migrate deploy",
+    "migrate:postgres-to-mysql": "node scripts/migrate-postgres-to-mysql.mjs",
     "seed": "dotenv -e ../.env -- tsx prisma/seed.ts",
     "test": "vitest run --exclude tests/integration.test.ts",
     "test:integration": "dotenv -e ../.env -- vitest run tests/integration.test.ts",
+    "test:mysql-crud": "dotenv -e ../.env -- node scripts/test-mysql-crud.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "postinstall": "prisma generate",
     "studio": "dotenv -e ../.env -- prisma studio"
@@ -26,7 +28,6 @@
     "@types/node": "^22.20.5",
     "@types/papaparse": "^5.5.2",
     "dotenv-cli": "^8.0.0",
-    "embedded-postgres": "^17.10.0-beta.17",
     "prisma": "^6.19.3",
     "socket.io-client": "^4.8.4",
     "tsx": "^4.23.15",
@@ -42,6 +43,8 @@
     "express-rate-limit": "^7.5.1",
     "helmet": "^8.3.0",
     "papaparse": "^5.7.0",
+    "mysql2": "^3.15.3",
+    "pg": "^8.16.3",
     "socket.io": "^4.8.4",
     "zod": "^3.25.76"
   }

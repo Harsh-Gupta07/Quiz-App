@@ -13,22 +13,18 @@ A real-time classroom quiz platform for **SCALive (Sharma Computer Academy, Bhop
 | Live session control | `/admin/session/:id` | Instructor laptop |
 | Results and CSV export | `/admin/session/:id/results` | Instructor laptop |
 
-**Stack:** React 19, Vite, TypeScript, Tailwind CSS 4, Motion, Lucide · Node.js, Express 5, Socket.IO 4 · PostgreSQL with Prisma 6 · qrcode.react · canvas-confetti. No paid APIs or third-party services.
+**Stack:** React 19, Vite, TypeScript, Tailwind CSS 4, Motion, Lucide · Node.js, Express 5, Socket.IO 4 · MySQL 8+ with Prisma 6 · qrcode.react · canvas-confetti.
 
 ---
 
 ## 1. Quick start (local development)
 
-Requirements: **Node.js 20+**. A PostgreSQL install is **not** required, because `npm run db:local` starts a real PostgreSQL 17 server from npm.
+Requirements: **Node.js 20+** and a MySQL 8+ database (local or hosted).
 
 ```bash
 npm install                      # installs everything (both workspaces)
 cp .env.example .env             # then set ADMIN_PASSWORD and SESSION_SECRET
 
-# Terminal 1 — local PostgreSQL on port 5433 (keep it running)
-npm run db:local
-
-# Terminal 2
 npm run db:migrate               # create tables
 npm run db:seed                  # add the 20 Claude AI workshop questions
 npm run dev                      # API on :4000 + web app on :5173
@@ -36,9 +32,7 @@ npm run dev                      # API on :4000 + web app on :5173
 
 Open **http://localhost:5173/admin** and log in with your `ADMIN_PASSWORD`. In development the password defaults to `scalive-admin` if none is set.
 
-`npm run dev:local` runs the database, the migrations and both dev servers in a single terminal.
-
-> The local database keeps its files in `%LOCALAPPDATA%\scalive-quiz-arena\pgdata`, outside the project folder, because OneDrive or Dropbox syncing a live database folder corrupts it. Override this with `LOCAL_PG_DIR`.
+Set `DATABASE_URL` in `.env` to the MySQL connection string before running migrations.
 
 ### Testing with real phones on the same Wi-Fi
 
@@ -55,9 +49,8 @@ When you open the app as `localhost`, the QR code automatically uses your laptop
 | Command | What it does |
 |---|---|
 | `npm run dev` | API (tsx watch, :4000) + Vite dev server (:5173, LAN-accessible, proxies `/api` and `/socket.io`) |
-| `npm run dev:local` | Same, plus the local database and migrations, in one terminal |
-| `npm run db:local` | Start the embedded PostgreSQL server (port 5433) |
 | `npm run db:migrate` | Apply Prisma migrations (`prisma migrate deploy`) |
+| `npm run db:transfer` | Copy and validate all data from `SOURCE_DATABASE_URL` (PostgreSQL) into the empty MySQL database |
 | `npm run db:migrate:dev` | Create a new migration after editing `schema.prisma` |
 | `npm run db:seed` | Seed the 20-question "Mastering Claude AI" quiz (idempotent) |
 | `npm run build` | Build the server (`server/dist`) and the client (`client/dist`) |
@@ -117,15 +110,16 @@ Sessions take a **snapshot** of the questions when the quiz starts, so editing a
 
 ## 4. Deployment
 
-The app is a **single Node.js service**: the same server delivers the REST API, Socket.IO and the built React app. Because everything is one origin, you need no CORS setup, cookies just work and the QR codes point at one URL. It needs a PostgreSQL database.
+The app is a **single Node.js service**: the same server delivers the REST API, Socket.IO and the built React app. It uses a MySQL 8+ database.
 
-> **Run exactly one instance.** Live game state (timers and connected sockets) is held in that server's memory and written through to PostgreSQL. If the server restarts mid-quiz, it reloads in-progress sessions from the database and students reconnect automatically, but several instances behind a load balancer are not supported. One small instance comfortably handles 100+ students. In load tests, 150 simultaneous answers were all acknowledged within about 135 ms.
+> **Run exactly one instance.** Live game state (timers and connected sockets) is held in that server's memory and written through to MySQL. If the server restarts mid-quiz, it reloads in-progress sessions from the database and students reconnect automatically.
 
 ### Environment variables
 
 | Variable | Required | Description |
 |---|---|---|
-| `DATABASE_URL` | ✅ | PostgreSQL connection string (`?sslmode=require` for most hosted databases) |
+| `DATABASE_URL` | ✅ | MySQL connection string: `mysql://USER:PASSWORD@HOST:3306/DATABASE` |
+| `SOURCE_DATABASE_URL` | only for transfer | Existing PostgreSQL connection string; never used by the running app |
 | `ADMIN_PASSWORD` | ✅ in production | Password for `/admin` |
 | `SESSION_SECRET` | ✅ in production | 32+ random characters used to sign admin cookies |
 | `PUBLIC_URL` | ✅ in production | The public `https://…` address. **This is what goes into the QR code.** Never localhost. |
@@ -139,24 +133,24 @@ The app is a **single Node.js service**: the same server delivers the REST API, 
 
 ### Option A — Render (Blueprint included)
 1. Push this folder to a GitHub repository.
-2. In Render, go to **New → Blueprint**, select the repo, and `render.yaml` creates the web service and a PostgreSQL database.
-3. Enter `ADMIN_PASSWORD` and `PUBLIC_URL` (for example `https://scalive-quiz-arena.onrender.com`, or your own domain once attached).
+2. In Render, go to **New → Blueprint** and select the repo.
+3. Enter your external MySQL `DATABASE_URL`, `ADMIN_PASSWORD`, and `PUBLIC_URL`.
 4. No seeding step is needed: on its first start with an empty database, the server adds the 20-question Claude AI quiz automatically (set `SEED_DEMO_QUIZ=false` to turn this off).
 
-The blueprint uses Render free plans. Free web services sleep after about 15 minutes idle and take about a minute to wake, so open the site a few minutes before class. Free Render Postgres expires after 30 days; for a lasting database, create a free one at neon.tech and set `DATABASE_URL` to it.
+The blueprint creates only the web service; provision MySQL separately and keep its backups enabled.
 
 ### Option B — Docker (any VPS, Railway, Fly.io, etc.)
 ```bash
 docker build -t scalive-quiz .
 docker run -p 4000:4000 \
-  -e DATABASE_URL="postgresql://…" \
+  -e DATABASE_URL="mysql://USER:PASSWORD@HOST:3306/DATABASE" \
   -e ADMIN_PASSWORD="…" -e SESSION_SECRET="…" \
   -e PUBLIC_URL="https://quiz.scalive.in" \
   scalive-quiz
 ```
 Put it behind HTTPS (Caddy, Nginx or the platform's proxy) and make sure the proxy forwards WebSocket upgrades. Most platforms do this by default.
 
-### Option C — Any Node host plus a free hosted Postgres (Neon or Supabase)
+### Option C — Any Node host plus hosted MySQL
 ```bash
 npm ci --include=dev && npm run build   # build
 npm start                               # migrate + run (set the env vars above)
@@ -167,7 +161,20 @@ Run `npm run build` and then `npm start` on the instructor laptop with `NODE_ENV
 
 ---
 
-## 5. How scoring and timing work
+## 5. One-time PostgreSQL to MySQL transfer
+
+1. Stop the application briefly so PostgreSQL cannot change during the final copy, and take a PostgreSQL provider backup/snapshot.
+2. Create an **empty** MySQL 8+ database with `utf8mb4` support.
+3. Put the real URLs in `.env` as `SOURCE_DATABASE_URL` (old PostgreSQL) and `DATABASE_URL` (new MySQL). Do not commit `.env`.
+4. Run `npm run db:migrate` to create the MySQL tables.
+5. Run `npm run db:transfer`. The copier reads PostgreSQL in a repeatable, read-only transaction, writes MySQL in one transaction, refuses a non-empty target, and rolls back if any table count differs.
+6. Start the app and verify quiz, session, participant, response, and results screens. Keep the PostgreSQL snapshot until that check is complete.
+
+The running application only uses `DATABASE_URL`. New quizzes, sessions, participants, and answers are automatically written into the migrated MySQL tables through Prisma.
+
+---
+
+## 6. How scoring and timing work
 
 **Fastest Finger First:**
 
@@ -204,7 +211,7 @@ Scores are only published at **reveal** time. During a question, students and th
 
 ---
 
-## 6. Architecture
+## 7. Architecture
 
 ```
 client/                      React app (Vite)
@@ -235,7 +242,7 @@ LEADERBOARD (last question) → FINISHED          any state → FINISHED (End qu
 - **Rooms:** `s:<session>` (students and presentation, public data only), `a:<session>` (admins), `p:<participant>` (personal score updates).
 - **No answer leaks:** public state contains the correct option only in `ANSWER_REVEAL` and `LEADERBOARD`. This is checked by the integration test.
 - **Reconnects:** on joining, a student gets a random secret token, and only its SHA-256 hash is stored. The token stays in the phone's `localStorage`, so after a refresh, network drop or browser restart the student is restored with the same answers and points. To prevent duplicate entries, names must be unique within a session (case- and space-insensitive), each participant is tied to one token, and new registrations lock when the quiz starts. Already registered students can always reconnect.
-- **Resilience:** state is written to PostgreSQL on every transition and answer. After a server restart, in-progress sessions are reloaded and their timers re-armed.
+- **Resilience:** state is written to MySQL on every transition and answer. After a server restart, in-progress sessions are reloaded and their timers re-armed.
 
 ### Security
 - Admin password compared in constant time. Login is rate-limited (10 attempts per 15 min per IP). Admin access uses a signed, `HttpOnly`, `SameSite=Lax` cookie with a 12 h lifetime, `Secure` over HTTPS. Socket admin commands re-verify the cookie on every call.
@@ -247,11 +254,10 @@ LEADERBOARD (last question) → FINISHED          any state → FINISHED (End qu
 
 ---
 
-## 7. Testing
+## 8. Testing
 
 ```bash
 npm test                    # 38 unit tests
-npm run db:local            # (separate terminal) then:
 npm run test:integration    # full live flow against the real server + DB
 ```
 
@@ -271,6 +277,6 @@ The integration test (`server/tests/integration.test.ts`) simulates **1 admin, 1
 
 ---
 
-## 8. Seeded question bank
+## 9. Seeded question bank
 
 **"Mastering Claude AI — Workshop Quiz"** has 20 medium-difficulty, mostly scenario-based questions covering zero-shot and few-shot prompting, role prompting, prompt structure and context, web search with citations, Projects, Skills and SKILL.md, Artifacts, Connectors, MCP, combined real-world workflows, and safe handling of connected apps (prompt injection and least privilege). Correct answers are spread evenly across A–D, and each question has a short explanation. It avoids fast-changing facts such as model names or pricing. All questions are editable in the admin panel.
